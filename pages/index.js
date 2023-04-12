@@ -1,8 +1,10 @@
 import Head from 'next/head'
 import Image from 'next/image'
 import styles from '../styles/Home.module.css'
+import axios from 'axios';
 
-export default function Home() {
+export default function Home(props) {
+  console.log(props)
   return (
     <div className={styles.container}>
       <Head>
@@ -13,12 +15,11 @@ export default function Home() {
 
       <main className={styles.main}>
         <h1 className={styles.title}>
-          Welcome to <a href="https://nextjs.org">Next.js!</a>
+          Welcome to <a href="https://nextjs.org">{props.name}</a>
         </h1>
 
         <p className={styles.description}>
-          Get started by editing{' '}
-          <code className={styles.code}>pages/index.js</code>
+         {props.facts[0].text}
         </p>
 
         <div className={styles.grid}>
@@ -66,4 +67,30 @@ export default function Home() {
       </footer>
     </div>
   )
+}
+
+function fetchFact() {
+  //Just a simple get request which gets back a fact in a JSON object
+  return axios
+      .get('https://uselessfacts.jsph.pl//random.json?language=en')
+      .then((res) => {
+          return res.data;
+      });
+}
+
+export async function getServerSideProps () {
+  const promises = [...new Array(Number(1))].map(() => fetchFact());
+
+  const facts = await Promise.all(promises);
+  const name = 'Danyel (From ServerSide)';
+  console.log('Hi from the server!');
+  console.log('Count:', 1);
+  console.log('Username:', name);
+  console.log('Facts:', facts);
+  return {
+      props: {
+          name,
+          facts,
+      },
+  };
 }
